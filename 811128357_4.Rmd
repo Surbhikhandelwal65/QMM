@@ -1,0 +1,169 @@
+---
+title: "QuantModelling: Assignment"
+output: html_document
+Description: Solving linear equation using R
+---
+Title - Linear Programming with R
+Name - Surbhi Khandelwal
+
+I have solved the problem using 2 different methods. One as you had shown and another using matrices. 
+Just wanted to mention all the decision variables, objective function, and constraints of the problem:
+
+L1  =  number of large units produced per day at Plant 1, 
+M1  =  number of medium units produced per day at Plant 1,
+S1  =  number of small units produced per day at Plant 1,
+L2  =  number of large units produced per day at Plant 2, 
+M2  =  number of medium units produced per day at Plant 2,
+S2  =  number of small units produced per day at Plant 2,
+L3  =  number of large units produced per day at Plant 3, 
+M3  =  number of medium units produced per day at Plant 3,
+S3  =  number of small units produced per day at Plant 3.
+
+Objective function:
+
+Maximize:   	420 L1 + 360 M1 + 300 S1 + 420 L2 + 360 M2 + 300 S2 + 420 L3 + 360 M3 + 300 S3,
+
+Subject To:
+		          L1 + M1 + S1   <=    750   (P1Cap)
+		          
+              L2 + M2 + S2   <=    900   (P2Cap)
+              
+              L3 + M3 + S3   <=    450   (P3Cap)
+
+              20 L1 + 15 M1 + 12 S1   <=    13000    (P1SqFoot)
+              
+              20 L2 + 15 M2 + 12 S2   <=    12000    (P2SqFoot)
+              
+              20 L3 + 15 M3 + 12 S3   <=    5000     (P3SqFoot)
+              
+              L1 + L2 + L3     <=      900    (LSales)
+              
+              M1 + M2 + M3     <=      1200   (MSales)
+              
+              S1 + S2 + S3     <=      750    (SSales)
+              
+              1/750(L1 + M1 + S1) -  1/900(L2 + M2 + S2) = 0   (EC1)
+              
+              1/750(L1 + M1 + S1) -  1/450(L3 + M3 + S3) = 0   (EC2)
+              
+              1/900(L2 + M2 + S2) -  1/450(L3 + M3 + S3) = 0   (EC3)
+(nonnegative)
+L1 >= 0, M1 >= 0, S1 >= 0, L2 >= 0, M2 >= 0, S2 >= 0, L3 >= 0, M3 >= 0, S3 >= 0.
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo= TRUE)
+```
+
+```{r comment=NA }
+library(lpSolve)
+library(lpSolveAPI)
+
+#Stating that there are 0 constraints and 9 decision variables.
+sol <- make.lp(0, 9)
+
+# Now create the objective function. The default is a minimization problem. 
+set.objfn(sol, c(420,360,300,420,360,300,420,360,300))
+
+# As the default is a minimization problem, we change the direction to set maximization
+lp.control(sol,sense='max')
+
+# Add the constraints
+add.constraint(sol, c(1,1,1,0,0,0,0,0,0), "<=", 750)
+add.constraint(sol, c(0,0,0,1,1,1,0,0,0), "<=", 900)
+add.constraint(sol, c(0,0,0,0,0,0,1,1,1), "<=", 450)
+add.constraint(sol, c(20,15,12,0,0,0,0,0,0), "<=", 13000)
+add.constraint(sol, c(0,0,0,20,15,12,0,0,0), "<=", 12000)
+add.constraint(sol, c(0,0,0,0,0,0,20,15,12), "<=", 5000)
+add.constraint(sol, c(1,0,0,1,0,0,1,0,0), "<=", 900)
+add.constraint(sol, c(0,1,0,0,1,0,0,1,0), "<=", 1200)
+add.constraint(sol, c(0,0,1,0,0,1,0,0,1), "<=", 750)
+add.constraint(sol, c(900,900,900,-750,-750,-750,0,0,0), "=", 0)
+add.constraint(sol, c(450,450,450,0,0,0,-750,-750,-750), "=", 0)
+add.constraint(sol, c(0,0,0,450,450,450,-900,-900,-900), "=", 0)
+
+#set.bounds(lprec, upper =  c(750,750,750,900,900,900,450,450,450), columns = c(1, 2,3,4,5,6,7,8,9))
+#set.bounds(lprec, upper =  c(900,1200,750,900,1200,750,900,1200,750), columns = c(1, 2,3,4,5,6,7,8,9))
+
+```
+
+
+```{r def }
+RowNames <- c("P1Cap", "P2Cap", "P3Cap","P1SqFoot",
+              "P2SqFoot","P3SqFoot","LSales","MSales","SSales","EC1","EC2","EC3")
+ColNames <- c("L1", "M1","S1","L2","M2","S2","L3","M3","S3")
+dimnames(sol) <- list(RowNames, ColNames)
+
+
+#Looking at the definition of sol
+sol
+
+#Solving the sol
+solve(sol)
+
+write.lp(sol, filename = "wgc.lp", type = "lp")
+
+```
+
+```{r res}
+#Getting the value of Objective Function and the decision variables
+get.objective(sol)
+get.variables(sol)
+```
+
+
+
+
+We get that value of Objective Function is 696000. This gives the maximum profit we can get basis the constraints.
+
+We should build:
+Large size bags in plant 1 - 516
+Medium size bags in plant 1 - 177
+Medium size bags in plant 2 - 666
+Small size bags in plant 2 - 166
+Small size bags in plant 3 - 416
+
+Here 's the 2nd Method I have used
+```{r set}
+#install.packages("lpsolve") Already have this package
+library(lpSolve)
+```
+
+```{r ass}
+#Assign objective function value
+f.obj <- c(420,360, 300, 420, 360, 300, 420, 360, 300)
+#Assign constraints value
+f.con <- matrix(c(1,1,1,0,0,0,0,0,0,
+                  0,0,0,1,1,1,0,0,0,
+                  0,0,0,0,0,0,1,1,1,
+                  20,15,12,0,0,0,0,0,0,
+                  0,0,0,20,15,12,0,0,0,
+                  0,0,0,0,0,0,20,15,12,
+                  1,0,0,1,0,0,1,0,0,
+                  0,1,0,0,1,0,0,1,0,
+                  0,0,1,0,0,1,0,0,1,
+                  900,900,900,-750,-750,-750,0,0,0,
+                  450,450,450,0,0,0,-750,-750,-750,
+                  0,0,0,450,450,450,-900,-900,-900),nrow = 12,byrow = TRUE)
+
+#Assign value of all operators
+f.dir <- c("<=","<=","<=","<=","<=","<=","<=","<=","<=","=","=","=")
+
+#Assign value of RHS
+f.rhs <- c(750,
+           900,
+           450,
+           13000,
+           12000,
+           5000,
+           900,
+           1200,
+           750,
+           0,
+           0,
+           0)
+
+#Calculate objective function
+lp("max", f.obj, f.con, f.dir, f.rhs)
+lp("max", f.obj, f.con, f.dir, f.rhs)$solution
+```
