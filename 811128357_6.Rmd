@@ -1,0 +1,55 @@
+---
+title: 'QuantModelling: Assignment'
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+Description: Solving linear equation using R
+---
+#Title - Linear Programming with R
+#Name - Surbhi Khandelwal
+
+For This Problem:
+Objective function
+min: +22 A1 +14 A2 +30 A3 +600 A1+ 600 A2+ 600 A3 + 16 B1 +20 B2 +24 B3 + 625 B1 + 625 B2 + 625 B3;
+
+(Cost of Shipping per product + cost of production for each product)
+
+Constraints:
+W1Demand: +A1 +B1 = 80;
+W2Demand: +A2 +B2 = 60;
+W3Demand: +A3 +B3 = 70;
+ASupply: +A1 +A2 +A3 <= 100;
+BSupply: +B1 +B2 +B3 <= 120;
+
+Where:
+A1 - Production at Plant A and being shipped to Warehouse 1
+A2 - Production at Plant A and being shipped to Warehouse 2
+A3 - Production at Plant A and being shipped to Warehouse 3
+B1 - Production at Plant B and being shipped to Warehouse 1
+B2 - Production at Plant B and being shipped to Warehouse 2
+B3 - Production at Plant B and being shipped to Warehouse 3
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo= TRUE)
+```
+
+```{r comment=NA }
+library(lpSolve)
+library(lpSolveAPI)
+#install.packages('tinytex')
+#tinytex::install_tinytex()
+y <- read.lp("Ass6.lp")
+y
+```
+
+Solving the problem to get objective function and do sensitivity and dual analysis. 
+```{r}
+solve(y)
+get.objective(y)
+get.variables(y)
+get.constraints(y)
+get.sensitivity.objex(y)
+get.sensitivity.rhs(y)
+```
