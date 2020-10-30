@@ -1,0 +1,273 @@
+---
+title: "Assignment 8 - DEA Analysis"
+name: " Surbhi Khandelwal"
+output:
+  pdf_document: default
+  html_notebook:
+    highlight: textmate
+    theme: cerulean
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE, comment=NA}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
+##                                 Surbhi Khandelwal
+***
+The Hope Valley Health Care Association owns and operates six nursing homes in adjoining
+states. An evaluation of their efficiency has been undertaken using two inputs and two outputs.
+The inputs are staffing labor (measured in average hours per day) and the cost of supplies (in
+thousands of dollars per day). The outputs are the number of patient-days reimbursed by third party sources and the number of patient-days reimbursed privately. 
+
+
+### Let us now calculate the weights to achieve the efficiency values for each nursing home
+
+#### Loading all the packages.
+
+```{r comments=NA}
+#install.packages("Benchmarking")
+library(Benchmarking)
+library(tidyverse)
+library(dplyr)
+```
+
+Our problem has 6 Nursing Homes with   
+2 inputs: staff Hours per day and supplies per day   
+2 outputs: Reimbursed Patient-days, Privately Paid patient-days.  
+
+```{r}
+input <- matrix(c(150,400,320,520,350,320, 0.2,0.7, 1.2,2.0,1.2,0.7),ncol=2)
+output <- matrix(c(14000,14000,42000,28000,19000,14000, 3500,21000, 10500,42000,25000,15000),ncol = 2)
+colnames(input) <- c("Staff Hours/day","Supplies/day")
+colnames(output) <- c("ReimursedPateients","Privately Paid Patients")
+main <- cbind(input, output)
+main
+
+```
+
+
+We now run the DEA analysis.
+
+\newpage
+
+# DEA Analysis with FDH
+```{r}
+e1 <- dea(input,output,RTS = "fdh")            # provide the input and output 
+
+effdh<- eff(e1)                            # put efficiency in a dataset
+
+p1<- peers(e1)                    # identify the peers
+
+colnames(p1)[1] <- "FDH_peer1"
+
+l1<- lambda(e1)                            # identify the relative weights given to the peers
+
+colnames(l1)[1] <- "FDH_L1"
+colnames(l1)[2] <- "FDH_L2"
+colnames(l1)[3] <- "FDH_L3"
+colnames(l1)[4] <- "FDH_L4"
+colnames(l1)[5] <- "FDH_L5"
+colnames(l1)[6] <- "FDH_L6"
+
+dea.plot(input,output,RTS="fdh",ORIENTATION="in-out",txt=rownames(input),main="FDH Plot")  # plot the results
+
+table1<- cbind(main,p1,l1,effdh)             #Summarised table
+table1
+
+```
+
+### This Model suggests that all the Nursing Branches are efficient.
+
+\newpage
+# DEA Analysis with CRS
+```{r}
+e2 <- dea(input,output,RTS = "crs")            # provide the input and output 
+
+efcrs<- eff(e2)
+
+p2<- peers(e2)                    # identify the peers
+
+colnames(p2)[1] <- "CRS_peer1"
+colnames(p2)[2] <- "CRS_peer2"
+colnames(p2)[3] <- "CRS_peer3"
+
+l2<- lambda(e2)                            # identify the relative weights given to the peers
+
+colnames(l2)[1] <- "CRS_L1"
+colnames(l2)[2] <- "CRS_L2"
+colnames(l2)[3] <- "CRS_L3"
+colnames(l2)[4] <- "CRS_L4"
+
+dea.plot(input,output,RTS="crs",ORIENTATION="in-out",main="CRS Plot")         # plot the results
+table2<- cbind(main,p2,l2,efcrs)            #Summarize the result
+table2
+
+```
+
+### The result indicates that Nursing branches 1,2,3 and 4 are efficient.
+### Efficiency of Nursing Branch 5 is 97.74% and of Branch 6 is 86.74%.
+### Branch 5 has 1, 2, and 4 as it's peers with relative weight of 0.2, 0.08, and 0.53.
+### Branch 6 has 1, 2, and 4 as it's peers with relative weight of 0.34, 0.39, and 0.13.
+
+
+\newpage
+# DEA Analysis with VRS
+```{r}
+e3 <- dea(input,output,RTS = "vrs")            # provide the input and output 
+
+efvrs<- eff(e3)
+
+p3<- peers(e3)                    # identify the peers
+
+colnames(p3)[1] <- "VRS_peer1"
+colnames(p3)[2] <- "VRS_peer2"
+colnames(p3)[3] <- "VRS_peer3"
+
+l3<- lambda(e3)                            # identify the relative weights given to the peers
+
+colnames(l3)[1] <- "VRS_L1"
+colnames(l3)[2] <- "VRS_L2"
+colnames(l3)[3] <- "VRS_L3"
+colnames(l3)[4] <- "VRS_L4"
+colnames(l3)[5] <- "VRS_L5"
+
+dea.plot(input,output,RTS="vrs",ORIENTATION="in-out",txt=rownames(input), main="VRS Plot")     # plot the results
+
+table3<- cbind(main,p3,l3,efvrs)
+table3
+
+
+```
+
+### The result indicates that Nursing branches 1,2,3,4 and 5 are efficient.
+### Efficiency of Nursing Branch 6 is 89.63%.
+### Branch 6 has 1, 2, and 5 as it's peers with relative weight of 0.4, 0.34, and 0.25.
+
+
+\newpage
+# IRS
+```{r}
+e4 <- dea(input,output,RTS = "irs")            # provide the input and output 
+
+efirs <- eff(e4)
+
+p4<- peers(e4)                    # identify the peers
+
+colnames(p4)[1] <- "IRS_peer1"
+colnames(p4)[2] <- "IRS_peer2"
+colnames(p4)[3] <- "IRS_peer3"
+
+l4<- lambda(e4)                            # identify the relative weights given to the peers
+
+colnames(l4)[1] <- "IRS_L1"
+colnames(l4)[2] <- "IRS_L2"
+colnames(l4)[3] <- "IRS_L3"
+colnames(l4)[4] <- "IRS_L4"
+colnames(l4)[5] <- "IRS_L5"
+
+dea.plot(input,output,RTS="irs",ORIENTATION="in-out",txt=TRUE,main="IRS Plot")    # plot the results
+
+table4<- cbind(main,p4,l4,efirs)
+table4
+
+
+```
+
+### The result indicates that Nursing branches 1,2,3,4 and 5 are efficient.
+### Efficiency of Nursing Branch 6 is 89.63%.
+### Branch 6 has 1, 2, and 5 as it's peers with relative weight of 0.4, 0.34, and 0.25.
+
+\newpage
+# DRS
+```{r}
+e5 <- dea(input,output,RTS = "drs")            # provide the input and output 
+
+efdrs<- eff(e5)
+
+p5<- peers(e5)                    # identify the peers
+
+colnames(p5)[1] <- "DRS_peer1"
+colnames(p5)[2] <- "DRS_peer2"
+colnames(p5)[3] <- "DRS_peer3"
+
+l5<- lambda(e5)                            # identify the relative weights given to the peers
+
+colnames(l5)[1] <- "DRS_L1"
+colnames(l5)[2] <- "DRS_L2"
+colnames(l5)[3] <- "DRS_L3"
+colnames(l5)[4] <- "DRS_L4"
+
+dea.plot(input,output,RTS="drs",ORIENTATION="in-out", main="DRS Plot")     # plot the results
+table5<- cbind(main,p5,l5,efdrs)
+table5
+
+```
+### The result indicates that Nursing branches 1,2,3 and 4 are efficient.
+### Efficiency of Nursing Branch 5 is 97.74% and of Branch 6 is 86.74%.
+### Branch 5 has 1, 2, and 4 as it's peers with relative weight of 0.2, 0.08, and 0.53.
+### Branch 6 has 1, 2, and 4 as it's peers with relative weight of 0.34, 0.39, and 0.13.
+
+\newpage
+# FRH
+```{r comment=NA}
+e6 <- dea(input,output,RTS = "add")            # provide the input and output 
+
+effrh <- eff(e6)
+
+p6<- peers(e6)                    # identify the peers
+
+colnames(p6)[1] <- "FRH_peer1"
+
+l6<- lambda(e6)                            # identify the relative weights given to the peers
+
+colnames(l6)[1] <- "FRH_L1"
+colnames(l6)[2] <- "FRH_L2"
+colnames(l6)[3] <- "FRH_L3"
+colnames(l6)[4] <- "FRH_L4"
+colnames(l6)[5] <- "FRH_L5"
+colnames(l6)[6] <- "FRH_L6"
+
+dea.plot(input,output,RTS="add",ORIENTATION="in-out",txt=rownames(input),main="FRH/ADD Plot ")
+table6<- cbind(main,p6,l6,effrh)
+table6
+
+```
+### According to this model, all the Nursing Branches are efficient.
+
+## Let's look at the efficiencies of all the models to compare them
+```{r}
+effic <- cbind(effdh,efcrs,efvrs,efirs,efdrs,effrh)
+effic
+```
+
+## So Looking at this we see that our model performs very similarly for:
+FDH and FRH
+CRS and DRS
+VRS and IRS
+
+
+In VRS, we can look at what will happen if we rescale a firm.
+In VRS, there are 2 possibilities:
+If we increase the input and the output increases - This is Constant Return to Scale.
+If we decrease the input and the output decreases - Decreasing Return to Scale.
+
+
+Comparing CRS and VRS
+CRS - determined by the highest achievable ratio of outputs to inputs in
+the sample, regardless of size.
+
+VRS - passes through the points where the Nursing Homes have the highest output to input ratios, given their relative size, then runs parallel to the respective axes beyond the extreme points.
+
+Mostly the efficiency scores calculated under variable returns, VRS, will be higher than or equal to those obtained under constant returns,CRS. Which we can observe in our output.
+
+When Efficiency score = 1, VRS and CRS coincide.
+
+IRS, Increasing returns to scale shows a proportional increase in all inputs causes outputs to increase by a greater proportion.
+
+FDH model relaxes the convexity assumption of basic DEA models. The efficiency scores of FDH input-oriented model are always greater than the ones of input-oriented variable returns to scale(VRS) model. We can easily see this in our output also, where we have efficiency score as 1 for all the Nursing Homes but it's not the same with efficiency scores for VRS. 
+
+Because of this above relationship: The production possibility set of FDH model is subset of VRS model as well as CRS model.
+
+FRH model permits input and output to enter in only discrete amounts. It's helpful when we want to use mixed integer programming type.
