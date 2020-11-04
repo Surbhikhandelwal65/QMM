@@ -1,0 +1,93 @@
+---
+title: 'QuantModelling: Assignment'
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+Description: Goal Programming
+---
+#Title - Goal Programming
+#Name - Surbhi Khandelwal
+
+The Research and Development Division of the Emax Corporation has developed three new
+products. A decision now needs to be made on which mix of these products should be produced.
+Management wants primary consideration given to three factors: total profit, stability in the
+workforce, and achieving an increase in the company’s earnings next year from the $75 million
+achieved this year. In particular, using the units given in the following table, they want to
+
+Maximize Z = P - 6C - 3D, where
+
+P = total (discounted) profit over the life of the new products,
+C = change (in either direction) in the current level of employment,
+D = decrease (if any) in next year’s earnings from the current year’s level.
+The amount of any increase in earnings does not enter into Z, because management is concerned
+primarily with just achieving some increase to keep the stockholders happy. 
+
+
+Q1. Define y1+ and y1-, respectively, as the amount over (if any) and the amount under (if any)
+the employment level goal. Define y2+ and y2- in the same way for the goal regarding earnings next year. Define x1, x2, and x3 as the production rates of Products 1, 2, and 3, respectively. With these definitions, use the goal programming technique to express y1+,y1- , y2+ and y2- algebraically in terms of x1, x2, and x3. Also express P in terms of x1, x2, and x3.
+
+
+### y1p - y1n = 6x1 + 4x2 + 5x3 - 50
+### y2p - y2n = 8x1 + 7x2 + 5x3 - 75
+
+### P = 20x1 + 15x2 + 25x3
+
+Q2. Express management’s objective function in terms of x1, x2, x3, y1+, y1- , y2+ and y2-.
+
+### Objective function
+### max: +20x1 + 15x2 + 25x3 - 6y1p - 6y1n - 3y2n; // We are basically calculating -penalty.
+
+### Constraints
+### EmpLevelGoal: +  6x1 + 4x2 + 5x3 - y1p + y1n  = 50;
+### EarGoal: + 8x1 + 7x2 + 5x3 - y2p + y2n = 75;
+
+
+### Where:
+### x1 - Production rates of product 1
+### x2 - Production rates of product 2
+### x3 - Production rates of product 3
+### y1p - auxillary variable for excess Emp level
+### y1n - auxially variable for less Emp level
+### y2p - auxiallry variable for excess Earnings next year
+### y2n - auxially variable for less Earnings next year
+
+#To find the constraint value for Profit, we need to first run the lp for it.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo= TRUE)
+```
+
+```{r comment=NA }
+library(lpSolve)
+library(lpSolveAPI)
+y <- read.lp("ass9.lp")
+y
+```
+
+Solving the problem to get objective function. 
+```{r}
+solve(y)
+get.objective(y)
+
+```
+#Our Objective function is: 225.
+#Let's look at the variables to understand what this means.
+
+```{r}
+
+get.variables(y)
+```
+
+
+### What this shows is:
+### x1 - Production rates of product 1 =0
+### x2 - Production rates of product 2 =0
+### x3 - Production rates of product 3=15
+### y1p - auxillary variable for excess Emp level =25
+### y1n - auxially variable for less Emp level =0
+### y2p - auxiallry variable for excess Earnings next year =0
+### y2n - auxially variable for less Earning next year =0
+
+### Our objective function = 25X15 - 6X25 = 225.
+### We can maximise our profits by making production rate of product 3 = 15, getting profits to 375 but we will need to hire 25 employees which will result in a penalty of 6X25 = 150, hence our objective function will be 225.
