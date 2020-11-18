@@ -1,0 +1,120 @@
+---
+title: 'QuantModelling: Assignment 10'
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+Description: Goal Programming
+---
+#Title - Integer Programming  
+#Name - Surbhi Khandelwal  
+
+
+
+AP is a shipping service that guarantees overnight delivery of packages in the continental US.
+The company has various hubs at major cities and airports across the country. Packages are
+received at hubs, and then shipped to intermediate hubs or to their final destination.
+The manager of the AP hub in Cleveland is concerned about labor costs, and is interested in
+determining the most effective way to schedule workers. The hub operates seven days a week,
+and the number of packages it handles varies from one day to another. The table below provides
+an estimate of the number of workers needed each day of the week.
+
+
+*
+#Xi = the number of workers assigned to shift i, i=1 ,7
+
+Min 775X1 +800X2 +800X3 +800X4 +800X5 +775X6 +750X7
+
+ST
+
+      X2+ X3+ X4+ X5+ X6     >= 18 } Sunday
+    
+          X3+ X4+ X5+ X6+ X7 >= 27 } Monday
+        
+  X1+         X4+ X5+ X6+ X7 >= 22 }Tuesday
+
+  X1+ X2+         X5+ X6+ X7 >= 26 } Wednesday
+  
+  X1+ X2+ X3+         X6+ X7 >= 25 } Thursday
+  
+  X1+ X2+ X3+ X4+         X7 >= 21 } Friday
+  
+  X1+ X2+ X3+ X4+ X5         >= 19 } Saturday
+  
+  Xi >= 0  and integer for all i 
+
+
+
+### Min 775X1 +800X2 +800X3 +800X4 +800X5 +775X6 +750X7
+
+### Constraints:
+    X2+ X3+ X4+ X5+ X6     >= 18 } Sunday
+    
+        X3+ X4+ X5+ X6+ X7 >= 27 } Monday
+        
+X1+         X4+ X5+ X6+ X7 >= 22 }Tuesday
+
+X1+ X2+         X5+ X6+ X7 >= 26 } Wednesday
+
+X1+ X2+ X3+         X6+ X7 >= 25 } Thursday
+
+X1+ X2+ X3+ X4+         X7 >= 21 } Friday
+
+X1+ X2+ X3+ X4+ X5         >= 19 } Saturday
+
+Xi >= 0  and integer for all i 
+
+### where
+X1 = shift 1 with Sunday and Monday off
+
+X2 = shift 2 with Monday and Tuesday off
+
+X3 = shift 3 with Tuesday and Wednesday off
+
+X4 = shift 4 with Wednesday and Thursday off
+
+X5 = shift 5 with Thursday and Friday off
+
+X6 = shift 6 with Friday and Saturday off
+
+X7 = shift 7 with Saturday and Sunday off
+
+#To find the constraint value for Profit, we need to first run the lp for it.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo= TRUE)
+```
+
+```{r comment=NA }
+library(lpSolve)
+library(lpSolveAPI)
+y <- read.lp("ass10.lp")
+y
+```
+
+Solving the problem to get objective function. 
+```{r}
+solve(y)
+get.objective(y)
+
+```
+#Our Objective function is: 25675.
+#Let's look at the variables to understand what this means.
+
+```{r}
+
+get.variables(y)
+```
+
+
+### What this shows is:
+#X1 = shift 1 with Sunday and Monday off = 2
+#X2 = shift 2 with Monday and Tuesday off = 4
+#X3 = shift 3 with Tuesday and Wednesday off = 5
+#X4 = shift 4 with Wednesday and Thursday off = 0
+#X5 = shift 5 with Thursday and Friday off = 8
+#X6 = shift 6 with Friday and Saturday off = 1
+#X7 = shift 7 with Saturday and Sunday off = 13
+
+### Our objective function = 2x775 + 4x800 + 5x800 + 8x800 + 1X775 + 13x750 = 25675.
+### The minimum cost that we can spend on salaries is 25675.
